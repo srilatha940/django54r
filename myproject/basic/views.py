@@ -47,7 +47,7 @@ def addStudent(request):
     elif request.method=="GET":
         result=list(Student.objects.values())
         print(result)
-        return JsonResponse({"status":"ok","data":result1},status=200)
+        return JsonResponse({"status":"ok","data":result},status=200)
 
     elif request.method=="PUT":
         data=json.loads(request.body)
@@ -73,8 +73,6 @@ def addStudent(request):
 
 
 
-
-
 @csrf_exempt
 def Instapost(request):
     print(request.method)
@@ -88,3 +86,8 @@ def Instapost(request):
         )
         return JsonResponse({"status":"success","id":post.id,"message":'post created successfully'},status=200)
     return JsonResponse({'error':"use post method"},status=200)
+
+def job1(request):
+    return JsonResponse({"message":"You have successfully applied for job1"},status=200)
+def job2(request):
+    return JsonResponse({"message":"You have successfully applied for job2"},status=200)
