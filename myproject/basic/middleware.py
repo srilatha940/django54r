@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+import re,json
 class basicMiddleware:
     def __init__(self,get_response):
         self.get_response=get_response
@@ -52,3 +53,39 @@ class AgeMiddleware:
             if(age_checker>25 and age_checker<18):
                 return JsonResponse({"error":"Yor are not eligible according to your age"},status=400)
         return self.get_response(request)
+
+
+class UsernameMiddleware:
+    def __init__(self,get_response):
+        self.get_response=get_response
+    def __call__(self,request):
+        if (request.path=='/signup/'):
+            data=json.loads(request.body)
+            username=data.get("username","")
+            # checks username is empty or not
+            if not username:
+                return JsonResponse({"error":"username is required"},status=400)
+            # checks length
+            if len(username)<3 or len(username)>20:
+                return JsonResponse({"error":"username should contain 3 to 20 characters"},status=400)
+            # checks starts with and ends with
+            if username[0] in "._" or username[-1] in "._":
+                return JsonResponse({"error":"username should not starts or ends with . or _"},status=400)
+            # checks allowed characters
+            if not re.match(r"^[a-zA-Z0-9._]+$",username):
+                return JsonResponse({"error":"username should contain letters,numbers,digits,.,_"},status=400)
+            # checks .. and __
+            if ".." in username or "__" in username:
+                return JsonResponse({"error":"cannot have .. __"},status=400)
+        return self.get_response(request)
+
+
+# class EmailMiddleware:
+#     def __init__(self,get_response):
+#         self.get_response=get_response
+#     def __call__(self,request):
+
+# class PasswordMiddleware:
+#     def __init__(self,get_response):
+#         self.get_response=get_response
+#     def __call__(self,request)

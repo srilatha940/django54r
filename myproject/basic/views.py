@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db import connection
 import json
 from django.views.decorators.csrf import csrf_exempt
-from basic.models import Student,Insta
+from basic.models import Student,Insta,Users
 # Create your views here.
 def sample(request):
     return HttpResponse("hello world")
@@ -52,7 +52,7 @@ def addStudent(request):
     elif request.method=="PUT":
         data=json.loads(request.body)
         ref_id=data.get('id')   #getting id 
-        new_email=data.get("email")     #getting name
+        new_email=data.get("email")     #getting email
         existing_student=Student.objects.get(id=ref_id) #fetched the object as per the id
         # print(existing_student)
         existing_student.email=new_email  #updating with new name
@@ -91,3 +91,15 @@ def job1(request):
     return JsonResponse({"message":"You have successfully applied for job1"},status=200)
 def job2(request):
     return JsonResponse({"message":"You have successfully applied for job2"},status=200)
+
+@csrf_exempt
+def signUp(request):
+    if request.method=="POST":
+        data=json.loads(request.body)
+        print(data)
+        user=Users.objects.create(
+            username=data.get('username'),
+            email=data.get("email"),
+            password=data.get('password')
+        )
+        return JsonResponse({"status":"success"},status=200)
