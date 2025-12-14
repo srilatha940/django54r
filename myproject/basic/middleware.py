@@ -80,12 +80,42 @@ class UsernameMiddleware:
         return self.get_response(request)
 
 
-# class EmailMiddleware:
-#     def __init__(self,get_response):
-#         self.get_response=get_response
-#     def __call__(self,request):
+class EmailMiddleware:
+    def __init__(self,get_response):
+        self.get_response=get_response
+    def __call__(self,request):
+        if(request.path=="/signup/"):
+            data=json.loads(request.body)
+            email=data.get("email")
+            if not email:
+                return JsonResponse({"error":"Email should not be empty"},status=400)
+            if "," in email or " " in email:
+                return JsonResponse({"error":"Email should not contain any spaces or comma"},status=400)
+            if email[0] in ".0123456789@" or email[-1]==".":
+                return JsonResponse({"error":"Email should not start with numbers . or @"},status=400)
+            if "@" not in email:
+                return JsonResponse({"error":"Email should contain @"},status=400)
+            if not re.match(r"^[a-zA-Z0-9._]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",email):
+                return JsonResponse({"error":"Invaild email format"},status=400)
+        return self.get_response(request)
 
-# class PasswordMiddleware:
-#     def __init__(self,get_response):
-#         self.get_response=get_response
-#     def __call__(self,request)
+class PasswordMiddleware:
+    def __init__(self,get_response):
+        self.get_response=get_response
+    def __call__(self,request):
+        if(request.path=="/signup/"):
+            data=json.loads(request.body)
+            username=data.get("username")
+            email=data.get("email")
+            password=data.get("password")
+            if not password:
+                return JsonResponse({"error":"password should not be empty"},status=400)
+            if(len(password)<8):
+                return JsonResponse({"error":"Password should me more than 8 characters"},status=400)
+            if(not any (c.islower() for c in password)) or (not any (c.isdigit() for c in password)):
+                return JsonResponse({"error":"password must contain atleast one lower character and one digit"},status=400)
+            if not re.match(r"^[A-Z.@_a-z0-9]+$",password):
+                return JsonResponse({"error":"Password should contain lowercase and uppercase characters"},status=400)
+            if password==username or password==email:
+                return JsonResponse({"error":"password should not match with usernamae or email"},status=400)
+        return self.get_response(request)
