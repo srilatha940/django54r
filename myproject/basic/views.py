@@ -5,6 +5,7 @@ from django.db import connection
 import json
 from django.views.decorators.csrf import csrf_exempt
 from basic.models import Student,Insta,Users
+from django.contrib.auth.hashers import make_password,check_password
 # Create your views here.
 def sample(request):
     return HttpResponse("hello world")
@@ -69,10 +70,6 @@ def addStudent(request):
     return JsonResponse({"error":"Use post method"},status=400)
 
 
-
-
-
-
 @csrf_exempt
 def Instapost(request):
     print(request.method)
@@ -103,3 +100,41 @@ def signUp(request):
             password=data.get('password')
         )
         return JsonResponse({"status":"success"},status=200)
+
+@csrf_exempt
+def signUp(request):
+    if request.method=="POST":
+        data=json.loads(request.body)
+        print(data)
+        user=Users.objects.create(
+            username=data.get('username'),
+            email=data.get("email"),
+            password=make_password(data.get('password'))
+        )
+        return JsonResponse({"status":"success"},status=200)
+
+@csrf_exempt
+def login(request):
+    if request.method=="POST":
+        data=request.POST
+        print(data)
+        username=data.get("username")
+        password=data.get("password")
+        try:
+            user=Users.objects.get(username=username)
+            if check_password(password,user.password):
+                return JsonResponse({"status":"successfully loggIn"},status=200)
+            else:
+                return JsonResponse({"status":"failure","message":"invalid password"},status=400)
+        except Users.DoesNotExist:
+            return JsonResponse({"status":"failure","message":"user not found"},status=400)
+
+
+def check(request):
+    hashed="pbkdf2_sha256$870000$Q5VAZZul7OL7J4elWLgEz3$uIZZyOlcmI/bRbwGZYLxDXa2KR4m/SBs9CcpofStNxs="
+    ipdata=request.POST
+    print(ipdata)
+    # hashed=make_password(ipdata.get('ip'))
+    x=check_password(ipdata.get('ip'),hashed)
+    print(x)
+    return JsonResponse({"status":"success","data":x},status=200)
