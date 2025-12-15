@@ -6,6 +6,8 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from basic.models import Student,Insta,Users
 from django.contrib.auth.hashers import make_password,check_password
+import jwt
+from django.conf import settings
 # Create your views here.
 def sample(request):
     return HttpResponse("hello world")
@@ -119,15 +121,22 @@ def login(request):
         data=request.POST
         print(data)
         username=data.get("username")
-        password=data.get("password")
+        password=data.get("password")       
         try:
             user=Users.objects.get(username=username)
             if check_password(password,user.password):
-                return JsonResponse({"status":"successfully loggIn"},status=200)
+                # token="a json web token"
+                payload={"username":username,"email":user.email,"id":user.id}
+                token=jwt.encode(payload,settings.SECRET_KEY,algorithm="HS256")
+                return JsonResponse({"status":"successfully loggedIn","token":token},status=200)
             else:
                 return JsonResponse({"status":"failure","message":"invalid password"},status=400)
         except Users.DoesNotExist:
             return JsonResponse({"status":"failure","message":"user not found"},status=400)
+    return JsonResponse(
+        {"status": "failure", "message": "Only POST method allowed"},
+        status=405
+    )
 
 
 def check(request):
