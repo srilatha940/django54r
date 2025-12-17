@@ -119,3 +119,18 @@ class PasswordMiddleware:
             if password==username or password==email:
                 return JsonResponse({"error":"password should not match with usernamae or email"},status=400)
         return self.get_response(request)
+
+class authenticate_middleware():
+    def __init__(self,get_response):
+        self.get_response=get_response
+    def __call__(self,request):
+        if request.path=="/users/":
+            token=request.headers.get("Authorization")
+            print(token,"token")        #prints bearer token
+            if not token:
+                return JsonResponse({"error":"Authorization token missing"},status=401)
+            token_value=token.split(" ")
+            print(token_value,"token_value")
+        return self.get_response(request)
+
+

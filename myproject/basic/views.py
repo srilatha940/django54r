@@ -151,3 +151,9 @@ def check(request):
     x=check_password(ipdata.get('ip'),hashed)
     print(x)
     return JsonResponse({"status":"success","data":x},status=200)
+
+@csrf_exempt   # built a method to get all the users from users table
+def getAllUsers(request):
+    if request.method=="GET":
+        users=list(Users.objects.values())
+        return JsonResponse({"status":"success","data":users},status=200)
